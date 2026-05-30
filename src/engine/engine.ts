@@ -153,6 +153,10 @@ export function reduce(prev: GameState, cmd: Command): ReduceResult {
     case "Timeout":
       handleTimeout(state, events, cmd.kind, cmd.epoch);
       break;
+    case "ForceSettle":
+      // 30 分钟时长硬上限到点(由网关 wall-clock 触发):立即按净资产排名结算。
+      if (state.phase === "playing") settle(state, events, "time-limit");
+      break;
     default: {
       const _never: never = cmd;
       void _never;
@@ -423,11 +427,11 @@ function advanceTurn(state: GameState, events: GameEvent[]): void {
 
   // 回合上限:任一玩家完成 maxTurnsPerPlayer -> 结算(先到先结算)。
   if (finishing.turnsTaken >= state.config.maxTurnsPerPlayer) {
-    settle(state, events);
+    settle(state, events, "turn-limit");
     return;
   }
   if (activePlayers(state).length <= 1) {
-    settle(state, events);
+    settle(state, events, "last-standing");
     return;
   }
 

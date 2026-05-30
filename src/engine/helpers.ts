@@ -117,14 +117,18 @@ export function bankrupt(state: GameState, events: GameEvent[], seatId: SeatId):
 export function maybeEndGame(state: GameState, events: GameEvent[]): boolean {
   if (state.phase !== "playing") return false;
   if (activePlayers(state).length <= 1) {
-    settle(state, events);
+    settle(state, events, "last-standing");
     return true;
   }
   return false;
 }
 
 /** 按净资产降序结算排名,结束对局。 */
-export function settle(state: GameState, events: GameEvent[]): void {
+export function settle(
+  state: GameState,
+  events: GameEvent[],
+  reason: "time-limit" | "turn-limit" | "last-standing",
+): void {
   if (state.phase === "ended") return;
   clearTimer(state, events);
   const ranked = state.players
@@ -134,7 +138,7 @@ export function settle(state: GameState, events: GameEvent[]): void {
   state.phase = "ended";
   state.ranking = ranked;
   state.turnPhase = "normal";
-  events.push({ type: "GameEnded", ranking: ranked });
+  events.push({ type: "GameEnded", ranking: ranked, reason });
 }
 
 // --- 计时器(D-004:唯一权威时钟槽,任一时刻只有一个在跑)---------------------

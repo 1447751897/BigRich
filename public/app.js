@@ -263,11 +263,13 @@ function auctionPanel(state) {
   return wrap;
 }
 
+let endReason = "";
 function renderResult(state) {
   const box = $("result");
   box.classList.remove("hidden");
   const lines = state.ranking.map((r) => `<li>${seatName(state, r.seatId)} — 净资产 $${r.netWorth}</li>`).join("");
-  box.innerHTML = `<div class="box"><h2>对局结束</h2><ol>${lines}</ol><button onclick="location.reload()">再来一局</button></div>`;
+  const why = { "time-limit": "30 分钟时长到点结算", "turn-limit": "回合上限到点结算", "last-standing": "仅剩一人" }[endReason] || "";
+  box.innerHTML = `<div class="box"><h2>对局结束</h2>${why ? `<p class="hint">${why}</p>` : ""}<ol>${lines}</ol><button onclick="location.reload()">再来一局</button></div>`;
 }
 
 // --- 工具 ------------------------------------------------------------------
@@ -286,6 +288,7 @@ function appendLog(events, state) {
   if (!events || !events.length) return;
   const log = $("log");
   for (const e of events) {
+    if (e.type === "GameEnded") endReason = e.reason;
     const txt = eventText(e, state);
     if (!txt) continue;
     const d = document.createElement("div"); d.textContent = txt; log.appendChild(d);
@@ -320,7 +323,7 @@ function eventText(e, s) {
     case "AuctionResolved": return e.result === "sold" ? `${nm(e.winner)} 以 $${e.amount} 拍得` : "流拍";
     case "PlayerBankrupt": return `${nm(e.seatId)} 破产出局`;
     case "ConnectionChanged": return `${nm(e.seatId)} ${e.status === "online" ? "重连回来" : e.status === "ai" ? "由 AI 托管" : "掉线"}`;
-    case "GameEnded": return "对局结算!";
+    case "GameEnded": return "对局结算!" + ({ "time-limit": "(30 分钟时长到点)", "turn-limit": "(回合上限到点)", "last-standing": "(仅剩一人)" }[e.reason] || "");
     case "Rejected": return null; // 非法操作静默
     default: return null;
   }
