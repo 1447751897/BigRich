@@ -1,8 +1,9 @@
 ---
 stage: acceptance
-status: todo
-owner: 未指派
+status: done
+owner: UI前端工程师 / reporter(方向认可)/ 评审官(放行)
 updated: 2026-05-30
+verdict: 通过(当前重构形态)
 ---
 # 验收测试 — 迭代:页面美化
 

@@ -1,7 +1,7 @@
 ---
 stage: tech-stack
-status: todo
-owner: 未指派
+status: n/a
+owner: UI前端工程师
 updated: 2026-05-30
 ---
 # 技术选型 — 迭代:页面美化(增量)

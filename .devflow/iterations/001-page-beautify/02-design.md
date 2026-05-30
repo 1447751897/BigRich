@@ -1,7 +1,7 @@
 ---
 stage: design
-status: todo
-owner: 未指派
+status: done
+owner: UI前端工程师
 updated: 2026-05-30
 ---
 # 方案设计 — 迭代:页面美化

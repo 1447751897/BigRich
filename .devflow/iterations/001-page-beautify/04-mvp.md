@@ -1,7 +1,7 @@
 ---
 stage: mvp
-status: in_progress
-owner: 开发工程师
+status: done
+owner: UI前端工程师
 updated: 2026-05-30
 ---
 # MVP 范围与计划 — 迭代:页面美化
