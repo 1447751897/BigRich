@@ -232,7 +232,8 @@ export type Command =
   | (BaseCommand & { type: "PassBid" })
   | (BaseCommand & { type: "EndTurn" })
   | (BaseCommand & { type: "SetConnection"; target: SeatId; status: ConnectionStatus })
-  | (BaseCommand & { type: "Timeout"; kind: TimerKind; epoch: number });
+  | (BaseCommand & { type: "Timeout"; kind: TimerKind; epoch: number })
+  | (BaseCommand & { type: "ForceSettle"; reason: "time-limit" });
 
 /** 还价内容(站在原发起方视角重新表述报价)。 */
 export interface TradeCounter {
@@ -274,7 +275,7 @@ export type GameEvent =
   | { type: "ConnectionChanged"; seatId: SeatId; status: ConnectionStatus }
   | { type: "TimerStarted"; kind: TimerKind; epoch: number; durationMs: number }
   | { type: "TimerCleared" }
-  | { type: "GameEnded"; ranking: { seatId: SeatId; netWorth: number; rank: number }[] }
+  | { type: "GameEnded"; ranking: { seatId: SeatId; netWorth: number; rank: number }[]; reason: "time-limit" | "turn-limit" | "last-standing" }
   | { type: "Rejected"; reason: string };
 
 export interface ReduceResult {

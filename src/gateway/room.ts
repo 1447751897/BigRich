@@ -42,6 +42,8 @@ export class RoomRuntime {
   private queue: Command[] = [];
   private processing = false;
   private timerHandle: number | null = null;
+  /** 独立的"对局时长硬上限"定时器(D-004 互斥时钟之外的全局 wall-clock,后台常驻)。 */
+  private gameCapHandle: number | null = null;
   private readonly opts: Required<Pick<RoomRuntimeOptions, "broadcast">> & RoomRuntimeOptions;
   private readonly scheduler: Scheduler;
 
@@ -49,6 +51,8 @@ export class RoomRuntime {
     this.state = initial;
     this.opts = opts;
     this.scheduler = opts.scheduler ?? realScheduler;
+    // 崩溃/重启后从快照恢复且对局进行中:重新挂上时长硬上限(按完整时长重计,见 04-mvp 限制说明)。
+    if (initial.phase === "playing") this.scheduleGameCap();
   }
 
   getState(): GameState {
@@ -79,14 +83,35 @@ export class RoomRuntime {
     }
   }
 
-  /** 根据引擎事件驱动真实定时器:TimerStarted -> 调度;TimerCleared -> 取消。 */
+  /** 根据引擎事件驱动真实定时器:TimerStarted -> 调度;TimerCleared -> 取消;开局/结束 -> 管理时长硬上限。 */
   private applyTimers(events: GameEvent[]): void {
     for (const ev of events) {
       if (ev.type === "TimerCleared") {
         this.cancelTimer();
       } else if (ev.type === "TimerStarted") {
         this.scheduleTimer(ev.kind, ev.epoch, ev.durationMs);
+      } else if (ev.type === "GameStarted") {
+        this.scheduleGameCap();
+      } else if (ev.type === "GameEnded") {
+        this.cancelGameCap();
       }
+    }
+  }
+
+  /** 调度对局时长硬上限:到点投递 ForceSettle,引擎按净资产排名强制结束(PRD ≤30 分钟收束 P0)。 */
+  private scheduleGameCap(): void {
+    this.cancelGameCap();
+    const ms = this.state.config.hardTimeLimitMin * 60_000;
+    this.gameCapHandle = this.scheduler.set(() => {
+      this.gameCapHandle = null;
+      this.submit({ type: "ForceSettle", issuer: "system", reason: "time-limit" });
+    }, ms);
+  }
+
+  private cancelGameCap(): void {
+    if (this.gameCapHandle !== null) {
+      this.scheduler.clear(this.gameCapHandle);
+      this.gameCapHandle = null;
     }
   }
 
