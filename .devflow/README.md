@@ -1,8 +1,9 @@
 # 开发流程总览(devflow)
 
-> devflow_template_version: 1.1
+> devflow_template_version: 1.2
 > 接手本项目?先读这里(或运行 `brief`)。文档是事实来源;如与代码不符,以最新讨论为准并立刻更新本文件。
-> 最近一次 check:2026-05-30(评审官首版阶段评审/防腐),未决 1 条:`05-acceptance` 仍 `drafting`、§5 结论空缺,待测试工程师补全其余 P0 用例并签字后升 done。
+> 最近一次 check:2026-05-30,未决 0 条(首版 baseline 五阶段均已 done)。
+> 模板迁移:2026-05-30 由 1.1 升级到 **1.2**(`02-design` 补「界面设计」、`05-acceptance` 补「界面/体验验收」;baseline 与迭代 001 均已补,仅加结构、未改既有内容)。
 
 ## 项目 baseline 进度
 
