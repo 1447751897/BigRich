@@ -9,8 +9,8 @@
 | 阶段     | 文件                       | 状态      | 负责人     | 更新日期   |
 |---------|----------------------------|-----------|-----------|-----------|
 | 产品需求 | project/01-requirements.md | done      | 产品经理   | 2026-05-30 |
-| 方案设计 | project/02-design.md       | todo      | 架构师     | -          |
-| 技术选型 | project/03-tech-stack.md   | todo      | -         | -          |
+| 方案设计 | project/02-design.md       | in_review | 架构师     | 2026-05-30 |
+| 技术选型 | project/03-tech-stack.md   | drafting  | 架构师     | 2026-05-30 |
 | MVP     | project/04-mvp.md          | todo      | -         | -          |
 | 验收测试 | project/05-acceptance.md   | todo      | -         | -          |
 
