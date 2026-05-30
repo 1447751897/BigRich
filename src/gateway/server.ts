@@ -18,6 +18,7 @@ import { createGame } from "../engine/engine.js";
 import type { Command, GameEvent, GameState, SeatId } from "../engine/types.js";
 import { aiDefaultCommand } from "./ai.js";
 import { RoomRuntime } from "./room.js";
+import { FileSnapshotStore, type SnapshotStore } from "./snapshot.js";
 import {
   AnonymousIdentityProvider,
   NoopComplianceGate,
@@ -63,10 +64,43 @@ export class GameGateway {
       compliance: new NoopComplianceGate(),
       embed: new NoopEmbedHost(),
     },
+    private store: SnapshotStore = new FileSnapshotStore(),
   ) {
     this.httpServer = createServer((req, res) => this.serveStatic(req, res));
     this.wss = new WebSocketServer({ server: this.httpServer });
     this.wss.on("connection", (ws) => this.onConnection(ws));
+    this.restoreFromSnapshots();
+  }
+
+  /** 启动时从快照恢复未结束的房间(D-005:重启/崩溃后资产/进度不丢)。 */
+  private restoreFromSnapshots(): void {
+    for (const snap of this.store.loadAll()) {
+      if (snap.state.phase === "ended") {
+        this.store.remove(snap.code);
+        continue;
+      }
+      const room: Room = {
+        code: snap.code,
+        hostSeat: snap.hostSeat,
+        sessions: new Map(snap.sessions.map((s) => [s.token, { seatId: s.seatId, token: s.token, ws: null }])),
+        seatToken: new Map(snap.sessions.map((s) => [s.seatId, s.token])),
+        seatCounter: snap.seatCounter,
+        runtime: undefined as unknown as RoomRuntime,
+      };
+      // 恢复时把全部座位标记 offline,等客户端持 token 重连(此前在线者重连即恢复)。
+      room.runtime = new RoomRuntime(snap.state, { broadcast: (events, state) => this.afterCommand(room, events, state) });
+      this.rooms.set(snap.code, room);
+    }
+  }
+
+  private persist(room: Room): void {
+    this.store.save({
+      code: room.code,
+      hostSeat: room.hostSeat,
+      sessions: [...room.sessions.values()].map((s) => ({ seatId: s.seatId, token: s.token })),
+      seatCounter: room.seatCounter,
+      state: room.runtime.getState(),
+    });
   }
 
   listen(): Promise<void> {
@@ -122,6 +156,7 @@ export class GameGateway {
       broadcast: (events, state) => this.afterCommand(room, events, state),
     });
     this.rooms.set(code, room);
+    this.persist(room);
     return room;
   }
 
@@ -213,10 +248,14 @@ export class GameGateway {
     for (const sess of room.sessions.values()) {
       if (sess.ws && sess.ws.readyState === sess.ws.OPEN) sess.ws.send(payload);
     }
-    // 嵌入口子①:对局结束回调宿主。
+    // 快照落盘(D-005):每次权威变更后持久化;结束则清理。
     const ended = events.find((e) => e.type === "GameEnded");
     if (ended && ended.type === "GameEnded") {
+      this.store.remove(room.code);
+      // 嵌入口子①:对局结束回调宿主。
       this.deps.embed.onGameEnded({ roomId: room.code, ranking: ended.ranking.map((r) => ({ seatId: r.seatId, rank: r.rank })) });
+    } else {
+      this.persist(room);
     }
     // AI 托管:若此刻该行动者非在线,替其发默认命令(快速防卡场,不依赖 25s 超时)。
     const ai = aiDefaultCommand(state);

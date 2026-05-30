@@ -5,6 +5,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { GameGateway } from "../src/gateway/server.js";
+import { MemorySnapshotStore } from "../src/gateway/snapshot.js";
 
 let gw: GameGateway | null = null;
 afterAll(async () => {
@@ -61,7 +62,7 @@ function drive(ws: WebSocket, seatId: string, s: any) {
 
 describe("端到端:完整一局闭环", () => {
   it("两人建房进房开局,自动跑到结算并广播排名", async () => {
-    gw = new GameGateway(0);
+    gw = new GameGateway(0, undefined, new MemorySnapshotStore());
     await gw.listen();
     const port = gw.actualPort();
 
