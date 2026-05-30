@@ -46,24 +46,29 @@ updated: 2026-05-30
 | 回合 FSM + 交易/拍卖/抵押子状态机 | 开发工程师 | done | 时钟互斥/出价原子性/超时掉线兜底 |
 | §4B 回归测试(TC-TRADE/AUCTION/MORTGAGE) | 开发工程师 | done | 29 用例全绿 |
 | 单写者房间运行时 + WebSocket 网关 + 三口子 seam | 开发工程师 | done | `src/gateway/*` 可运行骨架 |
-| 断线重连/会话 token/快照落盘 | 开发工程师 | todo | 下一轮 |
-| 前端 Web/H5 渲染接入 | 待指派 | todo | 协议见 `types.ts` Intent/Event |
-| 主动决策 AI 托管(网关侧) | 待指派 | todo | 引擎已留 synthetic 命令通道 |
+| lobby 动态加入(JoinSeat) | 开发工程师 | done | 免注册输昵称占座,服务端权威 |
+| 大厅/会话协议 + HTTP 静态服务 + 简单 AI 托管 | 开发工程师 | done | create/join/start/reconnect/cmd;§4C 防卡场 |
+| 前端 Web/H5 最小可玩页面 | 开发工程师 | done | `public/*`,大厅→棋盘→操作→交易/拍卖→结算 |
+| 端到端"跑通完整一局"验证 | 开发工程师 | done | `test/e2e.test.ts` 真实 WS 到结算 |
+| 断线重连**快照落盘** + 30 分钟时长硬上限计时 | 开发工程师 | todo | 重连握手已通,落盘与时长封顶下一轮 |
+| AI 托管"会玩"强度升级 | 待指派 | backlog | 二期,首版被动规则已防卡场 |
 
 ## 4. 里程碑
-- M1(本轮已达成):最高风险件 §4B 三子状态机打通 + 回归测试全绿 + 网关骨架可运行。
-- M2:重连/会话/快照落盘 + 前端最小可玩页面 → 端到端跑通一局。
-- M3:试玩调参(GameConfig)+ AI 托管增强 + 测试工程师补全 05-acceptance 其余 P0。
+- M1(已达成):最高风险件 §4B 三子状态机打通 + 回归测试全绿 + 网关骨架可运行。
+- **M2(本轮已达成):前端最小可玩页面 + 大厅/会话/重连 + 简单 AI 托管 → 端到端跑通完整一局(e2e 测试到结算)。客户可本地启动试玩。**
+- M3:快照落盘 + 30 分钟时长硬上限 + 试玩调参(GameConfig)+ 测试工程师补全 05-acceptance 其余 P0。
 
 ## 5. 依赖与阻塞
-- 无阻塞。前端接入与重连链路为后续并行项;测试工程师可基于现有 29 条回归继续补 05-acceptance 的完整闭环/收束/重连/防作弊抽检用例。
+- 无阻塞。可转测试工程师基于现有 32 条回归 + 可试玩环境补 05-acceptance 的完整闭环/收束/重连/防作弊抽检用例。
+- 已知缺口:30 分钟时长硬上限尚未接 wall-clock(当前靠每人 20 回合上限收束);快照尚未真正落盘(`onSnapshot` 留空,内存即权威态)。
 
-## 6. 代码位置 / 如何验证
-- 引擎:`src/engine/`(`engine.ts` reducer、`trade/auction/mortgage.ts` 子状态机、`config.ts` §4A 基线、`rng.ts` 服务端掷骰)。
-- 网关:`src/gateway/`(`room.ts` 单写者+时钟、`server.ts` WebSocket、`seams.ts` 三口子)。
-- 测试:`npm test`(vitest,29 用例);类型检查:`npm run typecheck`;启动网关:`npm run dev:server`。
+## 6. 代码位置 / 如何启动试玩
+- 引擎:`src/engine/`;网关:`src/gateway/`(`room.ts` 单写者+时钟、`server.ts` WS+大厅+静态、`ai.ts` AI 托管、`seams.ts` 三口子);前端:`public/`。
+- 启动:`npm install` → `npm run dev:server` → 浏览器开 `http://localhost:8080`,创建房间得房间码/链接,另开标签页或发链接给朋友输房间码进房,房主点开始即可对战。
+- 测试:`npm test`(vitest,32 用例,含 e2e 完整一局);类型检查:`npm run typecheck`。
 
 ## 变更记录
 | 日期 | 改了什么 | 为什么 |
 |------|----------|--------|
 | 2026-05-30 | 开发工程师进入 04-mvp:拍板技术选型,落地端无关引擎 + §4B 三子状态机 + 29 条回归测试 + 单写者网关骨架 + 三口子 seam | 架构师交接最高风险件优先实现 |
+| 2026-05-30 | M2:lobby 动态加入 + 大厅/会话/重连协议 + HTTP 静态服务 + 简单 AI 托管 + 前端最小可玩页面 + e2e 完整一局验证(32 用例全绿) | 按需求澄清官里程碑"端到端可试玩闭环"推进 |
