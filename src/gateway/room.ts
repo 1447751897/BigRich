@@ -28,7 +28,12 @@ export interface Scheduler {
 }
 
 const realScheduler: Scheduler = {
-  set: (fn, ms) => setTimeout(fn, ms) as unknown as number,
+  set: (fn, ms) => {
+    const h = setTimeout(fn, ms);
+    // 不阻止进程/测试 worker 退出:计时器只在有活连接时才有意义。
+    if (typeof (h as { unref?: () => void }).unref === "function") (h as { unref: () => void }).unref();
+    return h as unknown as number;
+  },
   clear: (h) => clearTimeout(h),
 };
 

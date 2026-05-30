@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BigRich · 轻量大富翁</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <h1>BigRich <small>轻量 · 可联机</small></h1>
+    <div id="conn" class="conn">未连接</div>
+  </header>
+
+  <!-- 进入 -->
+  <section id="entry" class="card">
+    <h2>开房 / 进房</h2>
+    <label>昵称 <input id="nickname" maxlength="16" placeholder="输入昵称即可玩" /></label>
+    <div class="row">
+      <button id="btnCreate">创建房间</button>
+      <span class="sep">或</span>
+      <input id="joinCode" maxlength="4" placeholder="房间码" style="text-transform:uppercase" />
+      <button id="btnJoin">加入</button>
+    </div>
+    <p id="entryErr" class="err"></p>
+  </section>
+
+  <!-- 大厅 -->
+  <section id="lobby" class="card hidden">
+    <h2>房间 <span id="lobbyCode" class="code"></span></h2>
+    <p>把房间码或链接发给朋友,2–8 人即可开局。</p>
+    <div id="lobbyLink" class="link"></div>
+    <ul id="seatList"></ul>
+    <button id="btnStart" class="hidden">开始游戏</button>
+    <p class="hint" id="startHint"></p>
+  </section>
+
+  <!-- 对局 -->
+  <section id="game" class="hidden">
+    <div class="game-grid">
+      <div id="board" class="board"></div>
+      <aside class="side">
+        <div id="players" class="players"></div>
+        <div id="actions" class="actions"></div>
+        <div id="subpanel" class="subpanel"></div>
+        <h3>事件</h3>
+        <div id="log" class="log"></div>
+      </aside>
+    </div>
+    <div id="result" class="result hidden"></div>
+  </section>
+
+  <script src="/app.js"></script>
+</body>
+</html>
