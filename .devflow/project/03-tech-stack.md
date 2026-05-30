@@ -65,7 +65,7 @@ updated: 2026-05-30
 - **合规**:首版按"不公开运营"做,不实现实名/防沉迷,仅在网关留 no-op seam(③)。
 
 ## 4. 迭代增量
-(暂无,baseline 首版。)
+- **迭代 001-page-beautify(前端表现层重构,2026-05-30):不引入新依赖。** 视觉/动画用**原生 CSS**(渐变/阴影/`aspect-ratio`/container query/transition;三档动画 + `prefers-reduced-motion`),音效用**原生 Web Audio 振荡器合成**(零素材文件,首个用户手势内解锁 AudioContext)。结论:UI 美化/重构无需 UI/动画/音频第三方库,维持 baseline 零前端依赖。
 
 ## 5. 变更记录
 | 日期 | 旧 → 新 | 原因 | 关联决策 |
