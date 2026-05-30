@@ -213,6 +213,7 @@ export interface BaseCommand {
 export type Command =
   | (BaseCommand & { type: "JoinSeat"; seatId: SeatId; displayName: string })
   | (BaseCommand & { type: "StartGame" })
+  | (BaseCommand & { type: "RestartGame" })
   | (BaseCommand & { type: "RollDice" })
   | (BaseCommand & { type: "BuyProperty" })
   | (BaseCommand & { type: "DeclineBuy" })
@@ -249,6 +250,7 @@ export interface TradeCounter {
 
 export type GameEvent =
   | { type: "SeatJoined"; seatId: SeatId; displayName: string; order: SeatId[] }
+  | { type: "GameReset"; order: SeatId[] }
   | { type: "GameStarted"; order: SeatId[] }
   | { type: "TurnChanged"; seatId: SeatId }
   | { type: "DiceRolled"; seatId: SeatId; dice: [number, number]; doubles: boolean }

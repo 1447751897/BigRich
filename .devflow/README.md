@@ -27,7 +27,9 @@
 
 | 编号 | 名称 | 类型 | 文件 | 状态 |
 |------|------|------|------|------|
-| -    | -    | -    | -    | -    |
+| 001  | 骰子点数不随机(生产固定种子) | fix | quick/001-dice-true-random.md | done |
+| 002  | 房主无法取消/解散房间 | fix | quick/002-host-cancel-room.md | done |
+| 003  | 再来一局未回房间(停留结算页) | fix | quick/003-rematch-back-to-lobby.md | done |
 
 ## 防腐约定(重要)
 

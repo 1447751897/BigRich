@@ -52,7 +52,23 @@ function handle(msg) {
     render(msg.state, []);
     return;
   }
+  if (msg.t === "room-closed") { resetToEntry(msg.reason === "host-cancelled" ? "房间已被房主解散" : ""); return; }
   if (msg.t === "state") render(msg.state, msg.events);
+}
+
+// 退回进房页:清会话、复位本地状态(房间解散 / 主动离开时调用)。
+function resetToEntry(notice) {
+  localStorage.removeItem("bigrich");
+  me = { seatId: null, token: null, host: false, roomCode: null };
+  last = null;
+  for (const k in pawnEls) { pawnEls[k].remove(); delete pawnEls[k]; }
+  closeSheet();
+  $("result").classList.add("hidden");
+  $("game").classList.add("hidden");
+  $("lobby").classList.add("hidden");
+  $("roomChip").classList.add("hidden");
+  $("entry").classList.remove("hidden");
+  $("entryErr").textContent = notice || "";
 }
 
 // --- 渲染主流程 -------------------------------------------------------------
@@ -62,6 +78,8 @@ function render(state, events) {
   processEvents(events, state, prev);
 
   if (state.phase === "lobby") {
+    // 「再来一局」重置回大厅:隐藏结算层与对局区,回到房间等待房主重新开始。
+    $("result").classList.add("hidden");
     $("game").classList.add("hidden"); $("lobby").classList.remove("hidden");
     renderLobby(state); return;
   }
@@ -88,6 +106,9 @@ function renderLobby(state) {
   const canStart = me.host && state.players.length >= 2;
   $("btnStart").classList.toggle("hidden", !me.host);
   $("btnStart").disabled = !canStart;
+  // 房主可解散房间;非房主可离开房间。
+  $("btnCancelRoom").classList.toggle("hidden", !me.host);
+  $("btnLeaveRoom").classList.toggle("hidden", me.host);
   $("startHint").textContent = me.host ? (canStart ? "" : "至少 2 人才能开始") : "等待房主开始…";
 }
 
@@ -349,8 +370,16 @@ function renderResult(state) {
       <span style="flex:1">${esc(seatName(state, r.seatId))}${i === 0 ? " 🏆" : ""}</span>
       <b>${coin(r.netWorth)}</b></li>`;
   }).join("");
-  $("result").classList.remove("hidden");
-  $("result").innerHTML = `<div class="box"><h2>🏁 对局结束</h2>${why ? `<p class="hint">${why}</p>` : ""}<ol>${items}</ol><button class="big" onclick="location.reload()">再来一局</button></div>`;
+  const res = $("result");
+  res.classList.remove("hidden");
+  res.innerHTML = `<div class="box"><h2>🏁 对局结束</h2>${why ? `<p class="hint">${why}</p>` : ""}<ol>${items}</ol></div>`;
+  const box = res.querySelector(".box");
+  // 「再来一局」:房主点击 -> 服务端把对局重置回大厅,所有人回到房间等待重新开始;非房主只等待。
+  if (me.host) {
+    box.appendChild(btn("再来一局", () => { sfx("click"); send({ t: "restart" }); }, "big"));
+  } else {
+    box.appendChild(hint("等待房主开始下一局…"));
+  }
 }
 
 // --- 事件 -> 音效 / 动画 / 日志 ---------------------------------------------
@@ -469,18 +498,21 @@ function eventText(e, s) {
     case "AuctionResolved": return e.result === "sold" ? `${nm(e.winner)} 以 ${coin(e.amount)} 拍得` : "流拍";
     case "PlayerBankrupt": return `💥 ${nm(e.seatId)} 破产出局`;
     case "ConnectionChanged": return `${nm(e.seatId)} ${e.status === "online" ? "重连回来" : e.status === "ai" ? "由 AI 托管" : "掉线"}`;
+    case "GameReset": return "🔄 房主开了新的一局,回到房间";
     case "GameEnded": return "🏁 对局结算!";
     default: return null;
   }
 }
 function errText(reason) {
-  return { "unknown-room": "房间不存在", "game-already-started": "游戏已开始,无法加入", "session-not-found": "会话失效,请重新进房", "only-host-can-start": "只有房主能开始", "room-full": "房间已满(上限 8 人)" }[reason] || reason;
+  return { "unknown-room": "房间不存在", "game-already-started": "游戏已开始,无法加入", "session-not-found": "会话失效,请重新进房", "only-host-can-start": "只有房主能开始", "only-host-can-restart": "只有房主能再来一局", "only-host-can-cancel": "只有房主能解散房间", "room-full": "房间已满(上限 8 人)" }[reason] || reason;
 }
 
 // --- 绑定 -------------------------------------------------------------------
 $("btnCreate").onclick = () => { ensureAudio(); send({ t: "create", nickname: $("nickname").value }); };
 $("btnJoin").onclick = () => { ensureAudio(); send({ t: "join", roomCode: $("joinCode").value.toUpperCase(), nickname: $("nickname").value }); };
 $("btnStart").onclick = () => { ensureAudio(); send({ t: "start" }); };
+$("btnCancelRoom").onclick = () => { if (confirm("确定解散房间?房内所有玩家将被退回大厅。")) send({ t: "cancelRoom" }); };
+$("btnLeaveRoom").onclick = () => { resetToEntry(""); };
 $("sheetClose").onclick = closeSheet;
 $("sheetBackdrop").onclick = closeSheet;
 
