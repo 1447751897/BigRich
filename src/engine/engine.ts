@@ -105,6 +105,9 @@ export function reduce(prev: GameState, cmd: Command): ReduceResult {
   const events: GameEvent[] = [];
 
   switch (cmd.type) {
+    case "JoinSeat":
+      joinSeat(state, events, cmd.seatId, cmd.displayName);
+      break;
     case "SetConnection": {
       const p = mustPlayer(state, cmd.target);
       p.connection = cmd.status;
@@ -160,6 +163,28 @@ export function reduce(prev: GameState, cmd: Command): ReduceResult {
 }
 
 // --- 对局生命周期 -----------------------------------------------------------
+
+/** lobby 阶段动态加入座位(免注册:输昵称即占座)。保持服务端权威、可快照。 */
+function joinSeat(state: GameState, events: GameEvent[], seatId: SeatId, displayName: string): void {
+  if (state.phase !== "lobby") return void reject(events, "game-already-started");
+  if (state.players.some((p) => p.seatId === seatId)) return void reject(events, "seat-taken");
+  if (state.players.length >= 8) return void reject(events, "room-full");
+  state.players.push({
+    seatId,
+    displayName: displayName.slice(0, 16) || `玩家${state.players.length + 1}`,
+    cash: state.config.startingCash,
+    position: 0,
+    inJail: false,
+    jailTurns: 0,
+    getOutCards: 0,
+    status: "active",
+    connection: "online",
+    turnsTaken: 0,
+    consecutiveTimeouts: 0,
+  });
+  state.order.push(seatId);
+  events.push({ type: "SeatJoined", seatId, displayName, order: [...state.order] });
+}
 
 function startGame(state: GameState, events: GameEvent[]): void {
   if (state.phase !== "lobby") return void reject(events, "already-started");
