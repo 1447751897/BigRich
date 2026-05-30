@@ -14,10 +14,19 @@ html, body { height: 100%; }
 body {
   margin: 0; color: var(--ink);
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  background: linear-gradient(160deg, var(--sky1), var(--sky2) 45%, var(--sky3));
+  background:
+    radial-gradient(1100px 560px at 50% -12%, rgba(255,255,255,.20), transparent 60%),
+    linear-gradient(160deg, var(--sky1), var(--sky2) 48%, var(--sky3));
   background-attachment: fixed;
   height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
 }
+/* 城市天际线背景:把空旷的蓝底变成有都市氛围的场景(纯装饰,不挡交互) */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0;
+  background: url("/skyline.svg") center bottom / 100% auto no-repeat;
+  pointer-events: none;
+}
+.topbar, main { position: relative; z-index: 1; }
 .hidden { display: none !important; }
 
 /* 顶部状态条 */
@@ -42,8 +51,13 @@ main { flex: 1 1 auto; min-height: 0; display: flex; }
 
 /* 卡片(进房/大厅) */
 .card {
-  background: var(--paper); border-radius: 20px; box-shadow: var(--shadow);
-  padding: 26px; width: min(440px, 92vw); text-align: center;
+  background: var(--paper); border-radius: 22px; box-shadow: 0 18px 50px rgba(12,28,60,.32);
+  padding: 30px 26px 26px; width: min(440px, 92vw); text-align: center;
+  position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,.65);
+}
+.card::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px;
+  background: linear-gradient(90deg, var(--accent), var(--gold) 50%, var(--accent2));
 }
 .card h2 { margin: 0 0 4px; font-size: 24px; }
 .sub { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
@@ -94,21 +108,24 @@ button:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
   position: absolute; inset: 0; display: grid;
   grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
   gap: 1.5%; padding: 1.5%;
-  background: #0f2a52; border-radius: 16px; box-shadow: var(--shadow);
+  background: radial-gradient(120% 120% at 50% 28%, #1d4378, #15376b 45%, #0c2348);
+  border-radius: 18px; box-shadow: var(--shadow), inset 0 0 60px rgba(0,0,0,.25);
 }
 .tile {
-  position: relative; background: var(--panel); border-radius: 8px; overflow: hidden;
+  position: relative; background: linear-gradient(180deg, #ffffff, #f4f8ff); border-radius: 9px; overflow: hidden;
   display: flex; flex-direction: column; padding: 4%;
-  font-size: clamp(7px, 1.5cqw, 12px); line-height: 1.15; box-shadow: inset 0 0 0 1px rgba(0,0,0,.04);
+  font-size: clamp(7px, 1.5cqw, 12px); line-height: 1.15;
+  box-shadow: inset 0 0 0 1px rgba(20,40,80,.06), 0 1px 2px rgba(10,25,55,.18);
 }
-.tile .band { height: 16%; min-height: 6px; border-radius: 4px; margin-bottom: 3%; }
+.tile .band { height: 20%; min-height: 7px; border-radius: 4px 4px 6px 6px; margin: -4% -4% 3%; filter: saturate(1.1); box-shadow: inset 0 -2px 3px rgba(0,0,0,.18); }
 .tile .nm { font-weight: 700; font-size: .9em; overflow: hidden; }
 .tile .pr { color: var(--muted); font-size: .82em; margin-top: auto; }
-.tile.corner { background: linear-gradient(135deg, #fff, #eaf3ff); align-items: center; justify-content: center; text-align: center; }
-.tile.corner .ico { font-size: 1.9em; }
-.tile.special { background: linear-gradient(135deg, #fff, #fff4ea); }
-.tile.special .ico { font-size: 1.9em; }
-.tile.cur { box-shadow: 0 0 0 3px var(--gold), var(--shadow); z-index: 2; }
+.tile.corner { background: linear-gradient(150deg, #eaf3ff, #d6e6ff); align-items: center; justify-content: center; text-align: center; box-shadow: inset 0 0 0 1px rgba(20,40,80,.08), 0 1px 3px rgba(10,25,55,.22); }
+.tile.corner .ico { font-size: 2em; filter: drop-shadow(0 1px 1px rgba(0,0,0,.18)); }
+.tile.corner .nm { font-size: .85em; color: var(--muted); }
+.tile.special { background: linear-gradient(150deg, #fff7ee, #ffe9d2); align-items: center; justify-content: center; text-align: center; }
+.tile.special .ico { font-size: 1.9em; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); }
+.tile.cur { box-shadow: 0 0 0 3px var(--gold), 0 0 14px rgba(244,183,64,.7), var(--shadow); z-index: 2; }
 .tile .owner { position: absolute; right: 4%; top: 4%; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
 .tile .bld { position: absolute; right: 4%; bottom: 3%; font-size: 1.1em; }
 .tile.mtg { filter: grayscale(.7) opacity(.7); }
@@ -126,18 +143,31 @@ button:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 }
 .pawn.me { outline: 3px solid var(--gold); outline-offset: -1px; border-radius: 50%; background: rgba(244,183,64,.25); box-shadow: 0 0 12px var(--gold); }
 
-/* 中央 hub */
+/* 中央 hub —— 城市中心广场(把原本的深色空洞做成有设计感的中央面板) */
 .hub {
-  position: absolute; left: 12.5%; top: 12.5%; width: 75%; height: 75%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2%;
-  pointer-events: none; text-align: center;
+  position: absolute; left: 14%; top: 14%; width: 72%; height: 72%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4%;
+  pointer-events: none; text-align: center; overflow: hidden;
+  border-radius: 22px;
+  background:
+    radial-gradient(90% 80% at 50% 30%, rgba(109,213,237,.28), transparent 70%),
+    linear-gradient(165deg, rgba(255,255,255,.16), rgba(255,255,255,.03));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), inset 0 8px 30px rgba(0,0,0,.20);
+  backdrop-filter: blur(1px);
 }
-.hub-city { font-size: clamp(20px, 8cqw, 60px); filter: drop-shadow(0 4px 8px rgba(0,0,0,.2)); }
-.turn-info { color: #fff; font-weight: 700; font-size: clamp(11px, 2.4cqw, 18px); text-shadow: 0 1px 3px rgba(0,0,0,.5); }
-.dice { display: flex; gap: 8px; }
+/* hub 底部小天际线,呼应背景 */
+.hub::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 34%;
+  background: url("/skyline.svg") center bottom / 130% auto no-repeat;
+  opacity: .8; pointer-events: none;
+}
+.hub-city { font-size: clamp(20px, 8cqw, 58px); filter: drop-shadow(0 4px 8px rgba(0,0,0,.3)); position: relative; z-index: 1; }
+.turn-info { color: #fff; font-weight: 800; font-size: clamp(11px, 2.4cqw, 18px); text-shadow: 0 1px 4px rgba(0,0,0,.6); position: relative; z-index: 1; }
+.dice { display: flex; gap: 9px; position: relative; z-index: 1; }
 .die {
-  width: clamp(22px, 7cqw, 46px); height: clamp(22px, 7cqw, 46px);
-  background: #fff; border-radius: 22%; box-shadow: 0 4px 10px rgba(0,0,0,.3);
+  width: clamp(24px, 7.2cqw, 48px); height: clamp(24px, 7.2cqw, 48px);
+  background: linear-gradient(150deg, #ffffff, #e9eefb); border-radius: 24%;
+  box-shadow: 0 5px 12px rgba(0,0,0,.38), inset 0 2px 3px rgba(255,255,255,.9), inset 0 -3px 5px rgba(20,40,80,.16);
   display: flex; align-items: center; justify-content: center;
   font-size: clamp(18px, 6cqw, 40px); color: #1f2a44; line-height: 1;
 }
