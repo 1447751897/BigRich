@@ -31,14 +31,14 @@ src/gateway/   连接/房间层(不含规则)
   room.ts        单写者房间运行时 + 真实时钟(到点投递 Timeout)
   server.ts      WebSocket 网关骨架
   seams.ts       三个预留口子:身份② / 合规③ / 嵌入①(首版 no-op)
-test/          §4B 回归 + 回合主循环 + 单写者/时钟集成(29 用例)
+test/          §4B 回归 + 回合主循环 + 单写者/时钟 + e2e 完整一局 + 时长上限 + 快照恢复(38 用例)
 ```
 
 ## 开发
 ```bash
 npm install
 npm run typecheck   # tsc --noEmit
-npm test            # vitest:29 用例(含 05-acceptance §4B 全部 seed)
+npm test            # vitest:38 用例(含 05-acceptance §4B 全部 seed + e2e/时长/快照)
 npm run dev:server  # 启动 WebSocket 网关(默认 ws://localhost:8080)
 ```
 
