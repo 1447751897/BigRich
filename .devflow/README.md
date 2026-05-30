@@ -9,10 +9,10 @@
 | 阶段     | 文件                       | 状态      | 负责人     | 更新日期   |
 |---------|----------------------------|-----------|-----------|-----------|
 | 产品需求 | project/01-requirements.md | done      | 产品经理   | 2026-05-30 |
-| 方案设计 | project/02-design.md       | in_review | 架构师     | 2026-05-30 |
+| 方案设计 | project/02-design.md       | done      | 架构师     | 2026-05-30 |
 | 技术选型 | project/03-tech-stack.md   | drafting  | 架构师     | 2026-05-30 |
-| MVP     | project/04-mvp.md          | todo      | -         | -          |
-| 验收测试 | project/05-acceptance.md   | todo      | -         | -          |
+| MVP     | project/04-mvp.md          | todo      | 开发工程师 | -          |
+| 验收测试 | project/05-acceptance.md   | drafting  | 架构师→测试工程师 | 2026-05-30 |
 
 > 说明:`01-requirements.md` 由**需求澄清官**基于与客户确认的《需求澄清纪要》填充,状态置 `in_review`,待**产品经理**接手细化为 PRD 并评审后升 `done`。
 
