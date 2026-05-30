@@ -20,7 +20,7 @@
 
 | 编号 | 名称 | 目录 | 当前阶段 | 状态 |
 |------|------|------|----------|------|
-| 001  | 页面美化/体验升级 | iterations/001-page-beautify/ | 方案设计(02-design,待架构师);需求 done | 进行中 |
+| 001  | 页面美化/体验升级 | iterations/001-page-beautify/ | 方案设计(02-design in_review,主题待客户过样·非阻塞)+ 增量选型(03 in_review);需求 done | 进行中 |
 
 ## 轻量改动(quick)
 
