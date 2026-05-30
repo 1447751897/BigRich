@@ -12,7 +12,7 @@ import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { WebSocketServer, type WebSocket } from "ws";
 import { createGame } from "../engine/engine.js";
 import type { Command, GameEvent, GameState, SeatId } from "../engine/types.js";
@@ -143,7 +143,9 @@ export class GameGateway {
   }
 
   private createRoom(code: string): Room {
-    const initial: GameState = createGame(code, []);
+    // 生产建房注入真随机种子(crypto):每局 RNG 起点不同,掷骰不可预期。
+    // 引擎默认种子仅供回归测试复现,绝不落到正式对局(修复"骰子点数按固定流程可预期")。
+    const initial: GameState = createGame(code, [], { seed: randomInt(0x100000000) });
     const room: Room = {
       code,
       hostSeat: null,
@@ -158,6 +160,16 @@ export class GameGateway {
     this.rooms.set(code, room);
     this.persist(room);
     return room;
+  }
+
+  /** 解散房间:通知房内全部连接退回大厅,移除内存房间与落盘快照。 */
+  private closeRoom(room: Room, reason: string): void {
+    const payload = JSON.stringify({ t: "room-closed", reason });
+    for (const sess of room.sessions.values()) {
+      if (sess.ws && sess.ws.readyState === sess.ws.OPEN) sess.ws.send(payload);
+    }
+    this.rooms.delete(room.code);
+    this.store.remove(room.code);
   }
 
   // --- 连接与协议 -----------------------------------------------------------
@@ -207,6 +219,23 @@ export class GameGateway {
           const sess = bound.room.sessions.get(bound.token)!;
           if (bound.room.hostSeat !== sess.seatId) return this.send(ws, { t: "error", reason: "only-host-can-start" });
           bound.room.runtime.submit({ type: "StartGame", issuer: sess.seatId });
+          break;
+        }
+        case "restart": {
+          // 「再来一局」:仅房主可发起,把已结束的对局重置回大厅,保留座位、等待房主重新开始(可再加入新玩家)。
+          if (!bound) return this.send(ws, { t: "error", reason: "not-in-room" });
+          const sess = bound.room.sessions.get(bound.token)!;
+          if (bound.room.hostSeat !== sess.seatId) return this.send(ws, { t: "error", reason: "only-host-can-restart" });
+          bound.room.runtime.submit({ type: "RestartGame", issuer: sess.seatId });
+          break;
+        }
+        case "cancelRoom": {
+          // 房主取消/解散房间:广播 room-closed,房内玩家被清退回大厅,房间与快照一并移除。
+          if (!bound) return this.send(ws, { t: "error", reason: "not-in-room" });
+          const sess = bound.room.sessions.get(bound.token)!;
+          if (bound.room.hostSeat !== sess.seatId) return this.send(ws, { t: "error", reason: "only-host-can-cancel" });
+          this.closeRoom(bound.room, "host-cancelled");
+          bound = null;
           break;
         }
         case "cmd": {

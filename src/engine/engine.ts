@@ -117,6 +117,9 @@ export function reduce(prev: GameState, cmd: Command): ReduceResult {
     case "StartGame":
       startGame(state, events);
       break;
+    case "RestartGame":
+      restartGame(state, events);
+      break;
     case "RollDice":
       rollDiceCmd(state, events, cmd.issuer);
       break;
@@ -200,6 +203,45 @@ function startGame(state: GameState, events: GameEvent[]): void {
   events.push({ type: "GameStarted", order: [...state.order] });
   events.push({ type: "TurnChanged", seatId: currentSeat(state) });
   startTurnTimer(state, events);
+}
+
+/**
+ * 「再来一局」:对局结束后把状态重置回 lobby,保留座位/座次/配置,等待房主重新开始。
+ * 不重置 rngState —— 续用当前(已推进过的)RNG 流,保证下一局骰子序列与上一局不同,
+ * 既避免在纯函数引擎里引入随机源,又不破坏可注入种子的回归可重放性。
+ */
+function restartGame(state: GameState, events: GameEvent[]): void {
+  if (state.phase !== "ended") return void reject(events, "game-not-ended");
+  state.phase = "lobby";
+  state.currentIndex = 0;
+  state.turnPhase = "normal";
+  state.rolledThisTurn = false;
+  state.trade = null;
+  state.auction = null;
+  state.pendingBuyTile = null;
+  state.timer = null;
+  state.ranking = [];
+  state.chancePtr = 0;
+  state.fatePtr = 0;
+  // 地产全部回到无主、无房、未抵押。
+  for (const ps of state.properties) {
+    ps.ownerSeatId = null;
+    ps.houseLevel = 0;
+    ps.mortgaged = false;
+  }
+  // 玩家保留座位与昵称/连接,游戏内数值复位。
+  for (const p of state.players) {
+    p.cash = state.config.startingCash;
+    p.position = 0;
+    p.inJail = false;
+    p.jailTurns = 0;
+    p.getOutCards = 0;
+    p.status = "active";
+    p.turnsTaken = 0;
+    p.consecutiveTimeouts = 0;
+  }
+  events.push({ type: "TimerCleared" });
+  events.push({ type: "GameReset", order: [...state.order] });
 }
 
 // --- 普通回合流 -------------------------------------------------------------
