@@ -10,7 +10,7 @@
  */
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { extname, join, normalize } from "node:path";
+import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { WebSocketServer, type WebSocket } from "ws";
@@ -71,6 +71,12 @@ export class GameGateway {
 
   listen(): Promise<void> {
     return new Promise((resolve) => this.httpServer.listen(this.port, () => resolve()));
+  }
+
+  /** 实际监听端口(构造传 0 时由系统分配,测试用)。 */
+  actualPort(): number {
+    const a = this.httpServer.address();
+    return typeof a === "object" && a ? a.port : this.port;
   }
 
   close(): void {
@@ -222,8 +228,9 @@ export class GameGateway {
   }
 }
 
-// 直接运行:tsx src/gateway/server.ts
-const isMain = import.meta.url === `file://${process.argv[1]?.replace(/\\/g, "/")}`;
+// 直接运行:tsx src/gateway/server.ts(跨平台判断入口,避免 Windows file:// 斜杠差异)
+const entry = process.argv[1] ? resolve(process.argv[1]) : "";
+const isMain = entry !== "" && fileURLToPath(import.meta.url) === entry;
 if (isMain) {
   const port = Number(process.env.PORT ?? 8080);
   const gw = new GameGateway(port);
