@@ -3,15 +3,17 @@
    只做表现(主题/动画/音效),绝不在客户端决定骰子点数。 */
 
 // --- 主题(自创、去 IP 化)---------------------------------------------------
-const SEAT_COLORS = ["#3d7eff", "#ff6f91", "#16c79a", "#f5a623", "#9b6dff", "#ff5d5d", "#00b8d9", "#8d6e63"];
+// 棋子/玩家配色:低饱和经典桌游色板(颜色 + 角色图标双重区分,色盲友好)
+const SEAT_COLORS = ["#3f6ea0", "#b5403a", "#3f7d57", "#cf8a45", "#7e6a9e", "#b9942f", "#5aa0b0", "#8a6a45"];
 const PAWN_ICONS = ["🚗", "🎩", "🐕", "🚀", "⛵", "🎸", "🦊", "🐱"];
+// 街区色带:低饱和版经典地产色组(克制、协调)
 const DISTRICTS = {
-  teal: { name: "翡翠湾", color: "#16c79a" },
-  amber: { name: "金沙滩", color: "#f5a623" },
-  coral: { name: "霓虹巷", color: "#ff6f91" },
-  violet: { name: "紫藤台", color: "#9b6dff" },
-  indigo: { name: "蓝湾港", color: "#3d7eff" },
-  crimson: { name: "朝阳门", color: "#ff5d5d" },
+  teal: { name: "翡翠湾", color: "#3f7d57" },
+  amber: { name: "金沙滩", color: "#d2b24c" },
+  coral: { name: "霓虹巷", color: "#bb6b91" },
+  violet: { name: "紫藤台", color: "#7e6a9e" },
+  indigo: { name: "蓝湾港", color: "#3f6ea0" },
+  crimson: { name: "朝阳门", color: "#b5403a" },
 };
 const TYPE_ICON = { start: "🏁", jail: "🚔", gotojail: "🚨", freeparking: "🌳", chance: "❓", fate: "🃏", tax: "🏦" };
 const TYPE_NAME = { start: "出发", jail: "拘留所", gotojail: "入狱", freeparking: "中央公园", chance: "机遇", fate: "命运", tax: "税务局" };
