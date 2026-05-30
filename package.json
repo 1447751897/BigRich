@@ -1,0 +1,27 @@
+{
+  "name": "bigrich",
+  "version": "0.1.0",
+  "private": true,
+  "description": "轻量级可联机大富翁类游戏 —— 服务端权威 + 单房间单写者 + 端无关规则引擎",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev:server": "tsx src/gateway/server.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
