@@ -1,6 +1,6 @@
 ---
 stage: mvp
-status: in_progress
+status: done
 owner: 开发工程师
 updated: 2026-05-30
 ---
@@ -29,7 +29,7 @@ updated: 2026-05-30
 - ✅ **GameConfig 参数化**:§4A 全部数值(28 格棋盘/起始资金/租金曲线/各计时/上限)做成可配置,建房载入,不写死。
 - ✅ **唯一权威时钟**:主时钟与子交互时钟互斥(D-004),超时投递合成命令走引擎。
 - ✅ **房间运行时(单写者)+ WebSocket 网关骨架** + **三口子 seam**(身份②/合规③/嵌入①,仅接口+no-op)。
-- ✅ **§4B 回归测试**:29 条 vitest 用例全绿,覆盖 05-acceptance 的 20 条 seed(TC-TRADE/AUCTION/MORTGAGE)+ 回合主循环 + 单写者/时钟集成。
+- ✅ **§4B 回归测试**:覆盖 05-acceptance 的 §4B seed(TC-TRADE/AUCTION/MORTGAGE)+ 回合主循环 + 单写者/时钟集成;含 M2/M3 后全套共 **38 条 vitest 用例全绿**。
 
 > 说明:§1 为 M1 首版交付清单;前端、重连、快照落盘、时长硬上限已在 M2/M3 补齐(见 §3 任务表与变更记录),当前测试 38 条全绿。
 
@@ -45,7 +45,7 @@ updated: 2026-05-30
 | 技术选型拍板(D-002/D-005 + 语言/框架) | 开发工程师 | done | 回填本文 §0 与 03-tech-stack |
 | 端无关引擎核心 + GameConfig 参数化 | 开发工程师 | done | `src/engine/*`,服务端 RNG |
 | 回合 FSM + 交易/拍卖/抵押子状态机 | 开发工程师 | done | 时钟互斥/出价原子性/超时掉线兜底 |
-| §4B 回归测试(TC-TRADE/AUCTION/MORTGAGE) | 开发工程师 | done | 29 用例全绿 |
+| §4B 回归测试(TC-TRADE/AUCTION/MORTGAGE) | 开发工程师 | done | 全套 38 用例全绿(含 §4B seed) |
 | 单写者房间运行时 + WebSocket 网关 + 三口子 seam | 开发工程师 | done | `src/gateway/*` 可运行骨架 |
 | lobby 动态加入(JoinSeat) | 开发工程师 | done | 免注册输昵称占座,服务端权威 |
 | 大厅/会话协议 + HTTP 静态服务 + 简单 AI 托管 | 开发工程师 | done | create/join/start/reconnect/cmd;§4C 防卡场 |
@@ -76,3 +76,4 @@ updated: 2026-05-30
 | 2026-05-30 | 开发工程师进入 04-mvp:拍板技术选型,落地端无关引擎 + §4B 三子状态机 + 29 条回归测试 + 单写者网关骨架 + 三口子 seam | 架构师交接最高风险件优先实现 |
 | 2026-05-30 | M2:lobby 动态加入 + 大厅/会话/重连协议 + HTTP 静态服务 + 简单 AI 托管 + 前端最小可玩页面 + e2e 完整一局验证(32 用例全绿) | 按需求澄清官里程碑"端到端可试玩闭环"推进 |
 | 2026-05-30 | M3:闭合验收待跟踪项 —— ① 30 分钟时长硬上限接 wall-clock 强制结算(`ForceSettle`);② 快照落盘 + 重启恢复(`FileSnapshotStore`)。38 用例全绿 | 测试工程师验收标的两个 P0/健壮性条件,开发闭合 |
+| 2026-05-30 | status in_progress → **done**;§1/§3 残留"29 用例"对齐为 38(实际) | 评审官首版阶段评审:M1/M2/M3 均达成、范围内任务 done、38 用例全绿、typecheck 通过,MVP 定稿 | - |
